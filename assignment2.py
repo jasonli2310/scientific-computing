@@ -32,20 +32,43 @@ def multiply(arrayA, vectorV):
     vectorV= np.array(vectorV)
     return arrayA*vectorV
 
+testArray = [[2, 1, 0], [3, 6, 2], [0, 2, 5]]
+
 def factor(arrayA):
 
     rowCount = 0
 
-    for row in arrayA:
-
+    for index in range(len(arrayA)-1):
         # factor row
-        factor = 1/row[rowCount]
+        factor = 1/arrayA[index][rowCount]
+        conceptRow1 = list(arrayA[rowCount])
+        conceptRow2 = list(arrayA[rowCount+1])
 
-        print(factor)
+        for idx, coeff in enumerate(conceptRow1):
+            conceptRow1[idx] = coeff*factor
 
-    # for element in row1:
-    #     element = element*factor
-    #
-    #
-    #
-    # row1[0]
+        variable = conceptRow2[rowCount]
+        # changes conceptRow2 to the difference
+        for i, coeff in enumerate(conceptRow2):
+            conceptRow2[i] = conceptRow2[i]-conceptRow1[i]*variable
+
+        #changes real row1
+        for idx, val in enumerate(arrayA[rowCount]):
+
+            print(conceptRow1)
+            print(arrayA[0])
+
+            if (idx > rowCount):
+                arrayA[rowCount][idx] = conceptRow1[idx]
+
+        #changes real row2
+        for idx, val in enumerate(arrayA[rowCount+1]):
+            if idx > rowCount:
+                arrayA[rowCount+1][idx] = conceptRow2[idx]
+
+        rowCount += 1
+
+    return arrayA
+
+# print(np.array(arrayA))
+print("final", factor(testArray))
