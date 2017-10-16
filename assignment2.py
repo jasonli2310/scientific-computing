@@ -24,14 +24,28 @@ row3 = [0, b(1), d(2), a(2), 0]
 row4 = [0, 0, b(2), d(3), a(3)]
 row5 = [0, 0, 0, b(3), d(4)]
 
-vectorV = [1, 2, 3, 4, 5]
-
-
+x = [1, 2, 3, 4, 5]
 arrayA = [row1, row2, row3, row4, row5]
 
 def multiply(arrayA, vectorV):
-
     arrayA= np.array(arrayA)
     vectorV= np.array(vectorV)
-
     return arrayA*vectorV
+
+def factor(arrayA):
+
+    rowCount = 0
+
+    for row in arrayA:
+
+        # factor row
+        factor = 1/row[rowCount]
+
+        print(factor)
+
+    # for element in row1:
+    #     element = element*factor
+    #
+    #
+    #
+    # row1[0]
