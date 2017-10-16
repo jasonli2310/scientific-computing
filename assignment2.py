@@ -55,9 +55,6 @@ def factor(arrayA):
         #changes real row1
         for idx, val in enumerate(arrayA[rowCount]):
 
-            print(conceptRow1)
-            print(arrayA[0])
-
             if (idx > rowCount):
                 arrayA[rowCount][idx] = conceptRow1[idx]
 
@@ -70,5 +67,26 @@ def factor(arrayA):
 
     return arrayA
 
-# print(np.array(arrayA))
-print("final", factor(testArray))
+
+
+def solve(arrayA, arrayY):
+    arrayX = [0] * len(arrayY) #reverse solve
+
+    arrayX[-1] = arrayY[-1]
+
+    for idx in reversed(range(len(arrayX)-1):
+        arrayX[idx] = arrayY[idx] - arrayA[idx][idx+1] * x[idx+1]
+
+    return x
+
+
+print("MULTIPLY")
+print(multiply(arrayA, x))
+print("\n\n")
+
+print("FACTOR")
+print(np.array(factor(arrayA)))
+print("\n\n")
+
+print("SOLVE")
+print(solve(arrayA, [1, 2, 3, 4, 5]))
