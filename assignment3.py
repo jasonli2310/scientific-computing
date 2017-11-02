@@ -36,7 +36,7 @@ import math
 
 
 def f(t, y):
-    return t*y
+    return t**2
 
 
 def hermiteCubicSolve(aX, bX, aY, bY, aPrime, bPrime, x):
@@ -49,7 +49,7 @@ def hermiteCubicSolve(aX, bX, aY, bY, aPrime, bPrime, x):
     return (term1 + term2 + term3 + term4)
 
 
-class computeYnew:
+class ComputeYnew:
     """docstring for step."""
     def __init__(self, t_now, Ynow, dt):
         self.k1 = f(t_now, Ynow)
@@ -66,12 +66,12 @@ class computeYnew:
 # derivatives of Y at the ends, together with the values Ynow
 # and Ynew. Evaluate Y at two points
 
-class computeError:
+class ComputeError:
     """docstring for Error."""
+
     def __init__(self, t_now, dt, Ynow, Ynew, k1):
 
         self.t_new = t_now+dt
-
         self.f_new = f(self.t_new,Ynew)
         self.c1 = 0.4-math.sqrt(0.06)
         self.c2 = 0.4+math.sqrt(0.06)
@@ -88,42 +88,115 @@ class computeError:
         self.w1 = (3*self.c2-1)/(6*(self.c1-self.c2)*(self.c1-1))
         self.w2 = (3*self.c1-1)/(6*(self.c2-self.c1)*(self.c2-1))
         self.wnew = 1 - self.w1 - self.w2
-
         self.dY_alt = dt * ( self.w1 * self.Fc1 + self.w2 * self.Fc2 + self.wnew * self.f_new)
 
 
-a = computeYnew(6, 2, 3)
-
-
-# print(f(a.start, a.end))
-
-print(a.Ynew)
-
-print(a.k1)
-
-
-b =computeError(0, 0.5, 1, 2, 0.5)
-print(b.dY_alt)
+# a = ComputeYnew(6, 2, 3)
+#
+# print(a.Ynew)
+#
+# print(a.k1)
+#
+# b =ComputeError(0, 0.5, 1, 2, 0.5)
+#
+# print(b.testMethod())
 
 
 
+timeFrame = [0,2]
+time = timeFrame[0]
+endTime = timeFrame[1]
+Ynow = 1
+dt = 0.1
+tolerance = 0.01
+dtmin = 0.05
+agrow = 1.25
+ashrink = 0.8
 
-    # where
+tol = 0.01
 
-    #
-    # Call these values Yr1 and Yc2.  Form FM1 =f(t_c1,Yc1), and
-    # fc2 =f(t_c2,Yc2). The alternate value of
-    #
-    # dY_alt = dt( w1 fc1 + w2 fc2 + wnew f_new)
-    #
-    # is formed by integrating f on the interval (t_now,tnew) using fc1,
-    # fc2, and f_new. This integration should be correct on quartics.  With
-    # some positive probability, the formulas for the w1, w2, and wnew are
-    #
-    #     w1 = (3c2-1)/(6(c1-c2)(c1-1)),
-    #     w2 = (3c1-1)/(6(c2-c1)(c2-1)),
-    #     wnew = 1 - w1 -w2.
-    #
+
+
+while time < endTime:
+    tryStep = ComputeYnew(time, Ynow, dt)
+    errorStep = ComputeError(time, dt, Ynow, tryStep.Ynew, tryStep.k1)
+    ei = abs(tryStep.dY - errorStep.dY_alt)/ dt
+
+
+    if (ei < tol and dt > dtmin):
+        time += dt
+        Ynow = tryStep.Ynew
+
+        '''altering dt for better estimations'''
+        if ei < tol/4:
+            dt *= agrow
+        elif ei > 0.75* tol:
+            dt *= ashrink
+
+        '''making sure dt fits at the end of tolerance'''
+        if time+dt > endTime:
+            dt = endTime-time;
+        elif time + 2*dt > endTime:
+            dt = (endTime-time)/2
+
+    else:
+        dt /= 2
+
+    print('newStep')
+    print(ei)
+    print(tryStep.Ynew)
+    print(errorStep.dY_alt)
+
+
+
+class simTime:
+
+    time = 0.0
+    dt = 0.0
+    tol = 0.0
+    agrow = 0.0
+    ashrink = 0.0
+    dtmin = 0.0
+    dtmax = 0.0
+    endTime = 0.0
+
+    stepsSinceRejection = 0
+    stepsRejectbed = 0
+    stepsAccepted = 0
+
+    """docstring for simTime."""
+    def __init__(self, tolerance):
+
+        self.time = 0.0
+        self.dt = 0.0
+        self.tol = tolerance
+        self.agrow = 0.0
+        self.ashrink = 0.0
+        self.dtmin = 0.0
+        self.dtmax = 0.0
+        self.endTime = 0.0
+
+        self.stepsSinceRejection = 0
+        self.stepsRejectbed = 0
+        self.stepsAccepted = 0
+
+
+
+
+
+#
+# def solve(a, b, Ynow, dt):
+#
+# class Solve(object):
+#
+#
+#     def __init__(self, a, b, Ynow, dt):
+#         t_now
+#
+
+
+
+
     # Finally, you should construct an error indicator
     #
     #   ei = || dY - dY_alt ||/dt,
