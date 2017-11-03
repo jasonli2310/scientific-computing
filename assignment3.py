@@ -72,15 +72,18 @@ class ComputeError:
 
 
 
-def plot(listF, tol):
-    x = []
-    y = []
-    for value in listF:
-        x.append(listF[0])
-        y.append(listF[1])
+def plotEnergy(tVals, energys, tol):
 
-    plt.plot(x, y)
-    plt.title('trajectory with tolerance', tol)
+    a = str(tol)
+
+    plt.plot(tVals, energys)
+    plt.title('time versus energy with tolerance ' + a)
+
+    plt.show()
+
+def plotYnow(xVals, yVals, tol):
+    plt.plot(xVals, yVals)
+    plt.title('tuple value of Ynow with tolerance ' + a)
     plt.show()
 
 
@@ -94,7 +97,7 @@ time = timeFrame[0]
 endTime = timeFrame[1]
 Ynow = [1, 0]
 dt = 0.05
-dtmin = 0.01
+dtmin = 0.001
 dtmax = 0.1
 agrow = 1.25
 ashrink = 0.8
@@ -155,11 +158,11 @@ def takeStep(tol, timeFrame, time, endTime, Ynow, dt, dtmin, dtmax, agrow, ashri
     print(xVals)
     print(yVals)
 
-    #plt.plot(tVals, xVals)
-    #plt.title('trajectory with tolerance', tol)
-
-    plt.plot(tVals, energys)
-    plt.show()
+    plotEnergy(tVals, energys, tol)
+    plotYnow(xVals, yVals, tol)
 
 
-takeStep(tol, timeFrame, time, endTime, Ynow, dt, dtmin, dtmax, agrow, ashrink, fnow, listF, xVals, yVals, tVals, energys)
+takeStep(0.1, timeFrame, time, endTime, Ynow, dt, dtmin, dtmax, agrow, ashrink, fnow, listF, xVals, yVals, tVals, energys)
+takeStep(0.01, timeFrame, time, endTime, Ynow, dt, dtmin, dtmax, agrow, ashrink, fnow, listF, xVals, yVals, tVals, energys)
+takeStep(0.001, timeFrame, time, endTime, Ynow, dt, dtmin, dtmax, agrow, ashrink, fnow, listF, xVals, yVals, tVals, energys)
+takeStep(0.0001, timeFrame, time, endTime, Ynow, dt, dtmin, dtmax, agrow, ashrink, fnow, listF, xVals, yVals, tVals, energys)
