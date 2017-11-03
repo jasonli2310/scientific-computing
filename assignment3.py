@@ -71,18 +71,23 @@ class ComputeError:
         self.dY_alt = dt * (self.w1 * np.array(self.Fc1) + self.w2 * np.array(self.Fc2) + self.wnew * np.array(self.f_new))
 
 
-timeFrame = [2,3]
+lengthTime = 3 * 2 * math.pi / (2-math.sqrt(0.3))**1.5)
+
+timeFrame = [0,lengthTime]
+
 time = timeFrame[0]
 endTime = timeFrame[1]
 Ynow = [1, 0]
 dt = 0.1
 tolerance = 0.01
-dtmin = 0.001
+dtmin = 0.01
+dtmax =
 agrow = 1.25
 ashrink = 0.8
 tol = 0.01
 
 fnow = [0, 0.3]
+
 
 while time < endTime:
     tryStep = ComputeYnew(time, Ynow, dt, fnow)
@@ -93,10 +98,17 @@ while time < endTime:
     # print('y new is', tryStep.Ynew)
 
     if (ei < tol or dt == dtmin):
+
         time += dt
         Ynow = tryStep.Ynew
         print("yup")
+
+        print('Energy is', 0.5 * (euclideanNorm(f(time, Ynow)))**2 - 1/euclideanNorm(Ynow))
+        print('Y is', Ynow)
+        print('t')
         # print(Ynow)
+
+
 
         '''altering dt for better estimations'''
         if ei < tol/4:
