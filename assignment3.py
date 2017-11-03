@@ -10,65 +10,41 @@ import numpy as np
 import math
 
 
-
-
-# You are to implement a solver that approximates the solution
-# of ordinary differential systems using a forth order Runge
-# Kutta technique. For the problem on [a,b]
-#
-#    y' = f(t,y),
-#    y(a) = y0,
-
-
-# Given: a, b, f, y0, t0 = a, tn = b,
-#
-#
-# Taking A Step. To advance from knowing the solution up to
-# t_now to knowing it up to t_new you will compute four
-# derivative values k1, k2, k3, and k4 as follows:
-#
-#    k1 = f(t_now,Ynow)
-#    k2 = f(t_now+dt/2, Ynow + k1 dt/2)
-#    k3 = f(t_now+dt/2, Ynow + k2 dt/2)
-#    k4 = f(t_now+dt, Ynow + k3 dt)
-#    dY = (k1 + 2 k2 + 2 k3 + k4 ) dt/6
-#    Ynew = Ynow + dY
-
-
 def f(t, y):
-    return t**4
-
+    return (-1 * np.array(y)) / (euclideanNorm(y))**3
 
 def hermiteCubicSolve(aX, bX, aY, bY, aPrime, bPrime, x):
 
-    term1 = (1+ 2*((x-aX)/(bX - aX))) * ((bX-x)/(bX-aX))**2 * aY
-    term2 = (x-aX) * ((bX-x)/(bX-aX))**2 * aPrime
-    term3 = (1+ 2*((bX-x)/(bX - aX))) * ((aX-x)/(aX-bX))**2 * bY
-    term4 = (x-bX) * ((bX-x)/(aX-bX))**2 * bPrime
+    term1 = (1+ 2*((x-aX)/(bX - aX))) * ((bX-x)/(bX-aX))**2 * np.array(aY)
+    term2 = (x-aX) * ((bX-x)/(bX-aX))**2 * np.array(aPrime)
+    term3 = (1+ 2*((bX-x)/(bX - aX))) * ((aX-x)/(aX-bX))**2 * np.array(bY)
+    term4 = (x-bX) * ((bX-x)/(aX-bX))**2 * np.array(bPrime)
 
     return (term1 + term2 + term3 + term4)
 
 
-#np.sum([[0, 1], [0, 5]], axis=0)
+def euclideanNorm(matrix):
+    result = 0
+    for term in matrix:
+        result += term**2.0
+    return math.sqrt(result)
+
+
 
 class ComputeYnew:
     """docstring for step."""
-    def __init__(self, t_now, Ynow, dt):
-        self.k1 = f(t_now, Ynow)
+    def __init__(self, t_now, Ynow, dt, fnow):
+
+        #self.k1 = f(t_now, Ynow)
+        self.k1 = fnow
+
         self.k2 = f(t_now + dt/2, np.sum([Ynow, np.array(self.k1)*dt/2], axis=0))
 
         self.k3 = f(t_now + dt/2, np.sum([Ynow, np.array(self.k2)*dt/2], axis=0))
         self.k4 = f(t_now + dt, np.sum([Ynow, np.array(self.k3)*dt], axis=0))
-        self.dY = (np.array(self.k1) + 2*np.array(self.k2)+ 2*np.array(self.k2) + np.array(self.k4)) * dt/2
+        self.dY = (np.array(self.k1) + 2*np.array(self.k2)+ 2.0*np.array(self.k2) + np.array(self.k4)) * dt/2
         self.Ynew = np.sum([Ynow + self.dY], axis=0)
 
-
-# You should construct an error indicator in the following
-# way.  Once a guess at Ynew exists evaluate f at (t_now+dt,
-# Ynew), call this result f_new.  View Y as an Hermite cubic
-# on the interval [t_now,t_now+dt] using k1 and f_new as the
-# derivatives of Y at the ends, together with the values Ynow
-# and Ynew. Evaluate Y at two points
 
 class ComputeError:
     """docstring for Error."""
@@ -92,128 +68,54 @@ class ComputeError:
         self.w1 = (3*self.c2-1)/(6*(self.c1-self.c2)*(self.c1-1))
         self.w2 = (3*self.c1-1)/(6*(self.c2-self.c1)*(self.c2-1))
         self.wnew = 1 - self.w1 - self.w2
-        self.dY_alt = dt * ( self.w1 * self.Fc1 + self.w2 * self.Fc2 + self.wnew * self.f_new)
+        self.dY_alt = dt * (self.w1 * np.array(self.Fc1) + self.w2 * np.array(self.Fc2) + self.wnew * np.array(self.f_new))
 
 
-a = ComputeYnew(6, [2], 3)
-#
-print(a.Ynew)
-#
-# print(a.k1)
-#
-# b =ComputeError(0, 0.5, 1, 2, 0.5)
-#
-# print(b.testMethod())
+timeFrame = [2,3]
+time = timeFrame[0]
+endTime = timeFrame[1]
+Ynow = [1, 0]
+dt = 0.1
+tolerance = 0.01
+dtmin = 0.001
+agrow = 1.25
+ashrink = 0.8
+tol = 0.01
 
+fnow = [0, 0.3]
 
-#
-# timeFrame = [0,2]
-# time = timeFrame[0]
-# endTime = timeFrame[1]
-# Ynow = 1
-# dt = 0.1
-# tolerance = 0.01
-# dtmin = 0.001
-# agrow = 1.25
-# ashrink = 0.8
-#
-# tol = 0.01
-#
-#
-#
-# while time < endTime:
-#     print(time)
-#     tryStep = ComputeYnew(time, Ynow, dt)
-#     errorStep = ComputeError(time, dt, Ynow, tryStep.Ynew, tryStep.k1)
-#     ei = abs(tryStep.dY - errorStep.dY_alt)/ dt
-#
-#
-#     print("ei is ", ei)
-#     print('y new is', tryStep.Ynew)
-#
-#     if (ei < tol or dt == dtmin):
-#         time += dt
-#         Ynow = tryStep.Ynew
-#         print("yup")
-#         print(Ynow)
+while time < endTime:
+    tryStep = ComputeYnew(time, Ynow, dt, fnow)
+    errorStep = ComputeError(time, dt, Ynow, tryStep.Ynew, tryStep.k1)
+    ei = euclideanNorm(tryStep.dY - errorStep.dY_alt)/ dt
 
-        # '''altering dt for better estimations'''
-        # if ei < tol/4:
-        #     dt *= agrow
-        # elif ei > 0.75* tol:
-        #     dt *= ashrink
-        #
-        # '''making sure dt fits at the end of tolerance'''
-        # if time+dt > endTime:
-        #     dt = endTime-time;
-        # elif time + 2*dt > endTime:
-        #     dt = (endTime-time)/2
+    # print("ei is ", ei)
+    # print('y new is', tryStep.Ynew)
 
-    # else:
-    #     print("nope")
-    #     if dt/2 < dtmin:
-    #         dt = dtmin
-    #     else:
-    #         dt = dt/2
-    #     print(dt)
+    if (ei < tol or dt == dtmin):
+        time += dt
+        Ynow = tryStep.Ynew
+        print("yup")
+        # print(Ynow)
 
+        '''altering dt for better estimations'''
+        if ei < tol/4:
+            dt *= agrow
+        elif ei > 0.75* tol:
+            dt *= ashrink
 
+        '''making sure dt fits at the end of tolerance'''
+        if time+dt > endTime:
+            dt = endTime-time;
+        elif time + 2*dt > endTime:
+            dt = (endTime-time)/2
 
-    # print('newStep')
-    # print(ei)
-    # print(tryStep.Ynew)
-    # print(errorStep.dY_alt)
+        fnow = f(time+dt, tryStep.Ynew)
 
-
-
-class simTime:
-
-    time = 0.0
-    dt = 0.0
-    tol = 0.0
-    agrow = 0.0
-    ashrink = 0.0
-    dtmin = 0.0
-    dtmax = 0.0
-    endTime = 0.0
-
-    stepsSinceRejection = 0
-    stepsRejectbed = 0
-    stepsAccepted = 0
-
-    """docstring for simTime."""
-    def __init__(self, tolerance):
-
-        self.time = 0.0
-        self.dt = 0.0
-        self.tol = tolerance
-        self.agrow = 0.0
-        self.ashrink = 0.0
-        self.dtmin = 0.0
-        self.dtmax = 0.0
-        self.endTime = 0.0
-
-        self.stepsSinceRejection = 0
-        self.stepsRejectbed = 0
-        self.stepsAccepted = 0
-
-
-
-
-
-#
-# def solve(a, b, Ynow, dt):
-#
-# class Solve(object):
-#
-#
-#     def __init__(self, a, b, Ynow, dt):
-#         t_now
-#
-
-
-
-
-    # Finally, you should construct an error indicator
-    #
-    #   ei = || dY - dY_alt ||/dt,
+    else:
+        print("nope")
+        if dt/2 < dtmin:
+            dt = dtmin
+        else:
+            dt = dt/2
+        print(dt)
