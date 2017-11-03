@@ -71,63 +71,95 @@ class ComputeError:
         self.dY_alt = dt * (self.w1 * np.array(self.Fc1) + self.w2 * np.array(self.Fc2) + self.wnew * np.array(self.f_new))
 
 
-lengthTime = 3 * 2 * math.pi / (2-math.sqrt(0.3))**1.5)
 
+def plot(listF, tol):
+    x = []
+    y = []
+    for value in listF:
+        x.append(listF[0])
+        y.append(listF[1])
+
+    plt.plot(x, y)
+    plt.title('trajectory with tolerance', tol)
+    plt.show()
+
+
+xVals = []
+yVals = []
+tVals = []
+energys = []
+lengthTime = 3 * 2 * math.pi / (2-math.sqrt(0.3))**1.5
 timeFrame = [0,lengthTime]
-
 time = timeFrame[0]
 endTime = timeFrame[1]
 Ynow = [1, 0]
-dt = 0.1
-tolerance = 0.01
+dt = 0.05
 dtmin = 0.01
-dtmax =
+dtmax = 0.1
 agrow = 1.25
 ashrink = 0.8
 tol = 0.01
-
 fnow = [0, 0.3]
+listF = []
+
+def takeStep(tol, timeFrame, time, endTime, Ynow, dt, dtmin, dtmax, agrow, ashrink, fnow, listF, xVals, yVals, tVals, energys):
+
+    while time < endTime:
+        tryStep = ComputeYnew(time, Ynow, dt, fnow)
+        errorStep = ComputeError(time, dt, Ynow, tryStep.Ynew, tryStep.k1)
+        ei = euclideanNorm(tryStep.dY - errorStep.dY_alt)/ dt
+
+        # print("ei is ", ei)
+        # print('y new is', tryStep.Ynew)
+
+        if (ei < tol or dt == dtmin):
+
+            time += dt
+            Ynow = tryStep.Ynew
+            print("yup")
+
+            print('Energy is', 0.5 * (euclideanNorm(f(time, Ynow)))**2 - 1/euclideanNorm(Ynow))
+            print('Y is', Ynow)
+            print('t is', time)
+
+            '''compile Ynow for trajectory plot'''
+            xVals.append(Ynow[0])
+            yVals.append(Ynow[1])
+            tVals.append(time)
+            energys.append(0.5 * (euclideanNorm(f(time, Ynow)))**2 - 1/euclideanNorm(Ynow))
 
 
-while time < endTime:
-    tryStep = ComputeYnew(time, Ynow, dt, fnow)
-    errorStep = ComputeError(time, dt, Ynow, tryStep.Ynew, tryStep.k1)
-    ei = euclideanNorm(tryStep.dY - errorStep.dY_alt)/ dt
+            '''altering dt for better estimations'''
+            if ei < tol/4 and dt*agrow < dtmax:
+                dt *= agrow
+            elif ei > 0.75* tol:
+                dt *= ashrink
 
-    # print("ei is ", ei)
-    # print('y new is', tryStep.Ynew)
+            '''making sure dt fits at the end of tolerance'''
+            if time+dt > endTime:
+                dt = endTime-time;
+            elif time + 2*dt > endTime:
+                dt = (endTime-time)/2
 
-    if (ei < tol or dt == dtmin):
+            fnow = f(time+dt, tryStep.Ynew)
 
-        time += dt
-        Ynow = tryStep.Ynew
-        print("yup")
-
-        print('Energy is', 0.5 * (euclideanNorm(f(time, Ynow)))**2 - 1/euclideanNorm(Ynow))
-        print('Y is', Ynow)
-        print('t')
-        # print(Ynow)
-
-
-
-        '''altering dt for better estimations'''
-        if ei < tol/4:
-            dt *= agrow
-        elif ei > 0.75* tol:
-            dt *= ashrink
-
-        '''making sure dt fits at the end of tolerance'''
-        if time+dt > endTime:
-            dt = endTime-time;
-        elif time + 2*dt > endTime:
-            dt = (endTime-time)/2
-
-        fnow = f(time+dt, tryStep.Ynew)
-
-    else:
-        print("nope")
-        if dt/2 < dtmin:
-            dt = dtmin
         else:
-            dt = dt/2
-        print(dt)
+            print("nope")
+            if dt/2 < dtmin:
+                dt = dtmin
+            else:
+                dt = dt/2
+            print(dt)
+
+
+    print(xVals)
+    print(yVals)
+
+    #plt.plot(tVals, xVals)
+    #plt.title('trajectory with tolerance', tol)
+
+    plt.plot(tVals, energys)
+    plt.show()
+
+
+takeStep(tol, timeFrame, time, endTime, Ynow, dt, dtmin, dtmax, agrow, ashrink, fnow, listF, xVals, yVals, tVals, energys)
